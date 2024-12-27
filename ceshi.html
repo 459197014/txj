@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滴滴接单模拟器</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #orderCount {
+            font-size: 22px;
+            margin-top: 20px;
+            color: #4CAF50;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #f44336;
+        }
+        #countdown {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <h1>滴滴接单模拟器</h1>
+    <button onclick="getOrder()">点击接单</button>
+    <p id="orderCount">已接订单数量: 0</p>
+    <p id="result"></p>
+    <p id="countdown"></p>
+
+    <script>
+        let orderCount = 0;
+        let countdownTimer;
+
+        function getOrder() {
+            // 显示接单等待倒计时
+            let countdown = 5; // 模拟等待5秒接单
+            document.getElementById('countdown').innerText = `等待接单... ${countdown}秒`;
+
+            countdownTimer = setInterval(function() {
+                countdown--;
+                document.getElementById('countdown').innerText = `等待接单... ${countdown}秒`;
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    simulateOrder();
+                }
+            }, 1000);
+        }
+
+        function simulateOrder() {
+            const randomNum = Math.random();
+            const resultText = randomNum > 0.5 ? '接到订单！快去接驾！' : '暂无订单，请继续等待...';
+            document.getElementById('result').innerText = resultText;
+
+            // 如果接到订单，增加订单数量
+            if (randomNum > 0.5) {
+                orderCount++;
+                document.getElementById('orderCount').innerText = `已接订单数量: ${orderCount}`;
+            }
+        }
+    </script>
+</body>
+</html>
