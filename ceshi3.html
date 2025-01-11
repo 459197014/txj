@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机数字（按钮滚动）测试版</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(to right, #ece9e6, #ffffff);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .header, .footer {
+            width: 100%;
+            height: 70px;
+            background: #2c3e50;
+            position: fixed;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .header {
+            top: 0;
+        }
+
+        .footer {
+            bottom: 0;
+        }
+
+        .main-content {
+            margin-top: 90px;
+            margin-bottom: 90px;
+            padding: 10px;
+        }
+
+        .container-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: nowrap; /* 保持单排 */
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            background: #fff;
+            margin: 10px auto;
+            max-width: 500px;
+        }
+
+        .box-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 5px; /* 调整间距 */
+        }
+
+        .box {
+            width: 25px; /* 数字格子宽度 */
+            height: 25px; /* 数字格子高度 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 12px; /* 调整字体大小 */
+            font-weight: bold;
+            margin-bottom: 5px; /* 与按钮间距 */
+        }
+
+        .button {
+            width: 20px; /* 按钮宽度 */
+            height: 20px; /* 按钮高度 */
+            border: 1px solid #333;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            font-size: 10px; /* 调整字体大小 */
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .button.active {
+            background-color: red;
+        }
+
+        .history {
+            max-width: 90%;
+            margin: 20px auto;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            padding: 10px;
+            text-align: center;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">测试版</div>
+    <div class="main-content">
+        <h1>随机数字（按钮滚动）测试版</h1>
+        <div class="container-wrapper" id="grid"></div>
+        <h2>历史记录</h2>
+        <div class="history">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Index</th>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        <th>5</th>
+                        <th>6</th>
+                        <th>7</th>
+                        <th>8</th>
+                        <th>9</th>
+                        <th>10</th>
+                    </tr>
+                </thead>
+                <tbody id="history-table">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="footer">测试版</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('grid');
+            const historyTable = document.getElementById('history-table');
+            const historyRecords = [];
+            const rollingStates = Array(10).fill(false);
+
+            function createGrid() {
+                grid.innerHTML = '';
+                for (let i = 0; i < 10; i++) {
+                    const boxContainer = document.createElement('div');
+                    boxContainer.className = 'box-container';
+
+                    const box = document.createElement('div');
+                    box.className = 'box';
+                    box.textContent = '?';
+                    box.dataset.index = i;
+
+                    const button = document.createElement('button');
+                    button.className = 'button';
+                    button.dataset.index = i;
+                    button.addEventListener('click', () => startRolling(i));
+
+                    boxContainer.appendChild(box);
+                    boxContainer.appendChild(button);
+                    grid.appendChild(boxContainer);
+                }
+            }
+
+            function startRolling(index) {
+                if (rollingStates[index]) return;
+
+                rollingStates[index] = true;
+                const button = document.querySelector(`.button[data-index='${index}']`);
+                button.classList.add('active');
+
+                const box = document.querySelector(`.box[data-index='${index}']`);
+                let rollInterval = null;
+
+                const animateRoll = () => {
+                    box.textContent = Math.floor(Math.random() * 10) + 1;
+                    rollInterval = requestAnimationFrame(animateRoll);
+                };
+
+                animateRoll();
+
+                setTimeout(() => {
+                    cancelAnimationFrame(rollInterval);
+                    const finalNumber = Math.floor(Math.random() * 10) + 1;
+                    box.textContent = finalNumber;
+                    button.classList.remove('active');
+                    rollingStates[index] = false;
+                    addHistory(index, finalNumber);
+                }, 5000);
+            }
+
+            function addHistory(index, number) {
+                const newRow = Array(10).fill('?');
+                newRow[index] = number;
+                historyRecords.push(newRow);
+
+                updateHistory();
+            }
+
+            function updateHistory() {
+                historyTable.innerHTML = '';
+
+                historyRecords.forEach((record, i) => {
+                    const row = document.createElement('tr');
+                    const indexCell = document.createElement('td');
+                    indexCell.textContent = i + 1;
+                    row.appendChild(indexCell);
+
+                    record.forEach(num => {
+                        const cell = document.createElement('td');
+                        cell.textContent = num;
+                        row.appendChild(cell);
+                    });
+
+                    historyTable.appendChild(row);
+                });
+            }
+
+            createGrid();
+        });
+    </script>
+</body>
+</html>
